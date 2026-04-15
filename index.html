@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Loan Predictor Pro | Approve / Reject Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e9f0fc 0%, #d9e3f0 100%);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* main card container */
+        .prediction-container {
+            max-width: 880px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(0px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* header branding */
+        .form-header {
+            background: #0f2b3d;
+            padding: 1.6rem 2rem;
+            color: white;
+        }
+
+        .form-header h1 {
+            font-size: 1.85rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-header h1::before {
+            content: "⚖️";
+            font-size: 1.9rem;
+        }
+
+        .form-header p {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.85;
+            font-weight: 400;
+        }
+
+        /* form body */
+        .form-body {
+            padding: 2rem 2rem 1.8rem;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem 2rem;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #2c3e4e;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        label i {
+            font-style: normal;
+            font-weight: 400;
+            font-size: 1rem;
+        }
+
+        input,
+        select {
+            background: #fefefe;
+            border: 1px solid #cad2db;
+            border-radius: 18px;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #0a1c2a;
+            transition: all 0.2s;
+            outline: none;
+            width: 100%;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 3px rgba(44, 125, 160, 0.2);
+        }
+
+        .hint-text {
+            font-size: 0.7rem;
+            color: #6c7e8f;
+            margin-top: 4px;
+        }
+
+        /* credit score specific style */
+        .credit-badge {
+            display: inline-block;
+            background: #ecf7f0;
+            border-radius: 30px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #1d6f2f;
+        }
+
+        /* action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1.2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-predict {
+            background: #1f6392;
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 44px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-predict:hover {
+            background: #0e4b70;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -8px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-reset {
+            background: #eef2f5;
+            border: 1px solid #cbdbe2;
+            padding: 0.9rem 2rem;
+            border-radius: 44px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 0.4;
+        }
+
+        .btn-reset:hover {
+            background: #e2e8f0;
+            border-color: #9aaebf;
+        }
+
+        /* result card */
+        .result-card {
+            margin: 1rem 2rem 2rem 2rem;
+            background: #f8fafd;
+            border-radius: 1.8rem;
+            padding: 1.2rem 1.8rem;
+            border-left: 6px solid #cbd5e1;
+            transition: all 0.25s;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .prediction-badge {
+            font-size: 1.9rem;
+        }
+
+        .verdict-text {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .verdict-approved {
+            color: #1e7e34;
+            background: #e0f5e8;
+            display: inline-block;
+            padding: 0.2rem 1rem;
+            border-radius: 60px;
+            font-size: 1.1rem;
+        }
+
+        .verdict-rejected {
+            color: #b91c1c;
+            background: #ffe6e5;
+            display: inline-block;
+            padding: 0.2rem 1rem;
+            border-radius: 60px;
+            font-size: 1.1rem;
+        }
+
+        .confidence-info {
+            font-size: 0.85rem;
+            color: #475569;
+            margin-top: 0.5rem;
+            border-top: 1px solid #e2edf2;
+            padding-top: 0.7rem;
+        }
+
+        .error-msg {
+            background: #fff0f0;
+            color: #b91c1c;
+            padding: 0.6rem 1rem;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* loader animation */
+        .loader {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* responsive */
+        @media (max-width: 700px) {
+            .input-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .full-width {
+                grid-column: span 1;
+            }
+
+            .form-body {
+                padding: 1.5rem;
+            }
+
+            .result-card {
+                margin: 0.5rem 1.5rem 1.8rem;
+            }
+
+            .verdict-text {
+                font-size: 1.3rem;
+            }
+        }
+
+        footer {
+            background: #f1f5f9;
+            text-align: center;
+            padding: 0.9rem;
+            font-size: 0.7rem;
+            color: #5c6f87;
+            border-top: 1px solid #e2edf2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="prediction-container">
+        <div class="form-header">
+            <h1>Loan Decision Intelligence (RITURAJ KUMAR)</h1>
+            <p>Predict approval likelihood · Real-time risk assessment · Powered by ML model</p>
+        </div>
+
+        <div class="form-body">
+            <form id="loanForm">
+                <div class="input-grid">
+                    <!-- Age -->
+                    <div class="input-field">
+                        <label>📅 Age (years)</label>
+                        <input type="number" id="age" name="Age" value="30" step="1" min="18" max="100" required>
+                        <div class="hint-text">18–100 years</div>
+                    </div>
+                    <!-- Income -->
+                    <div class="input-field">
+                        <label>💰 Annual Income</label>
+                        <input type="number" id="income" name="Income" value="60000" step="1000" min="0" required>
+                        <div class="hint-text">Gross yearly income</div>
+                    </div>
+                    <!-- Loan Amount -->
+                    <div class="input-field">
+                        <label>🏦 Loan Amount</label>
+                        <input type="number" id="loan_amount" name="Loan_Amount" value="20000" step="1000" min="500"
+                            required>
+                        <div class="hint-text">Requested principal</div>
+                    </div>
+                    <!-- Credit Score -->
+                    <div class="input-field">
+                        <label>⭐ Credit Score <span class="credit-badge">300-850</span></label>
+                        <input type="number" id="credit_score" name="Credit_Score" value="680" step="1" min="300"
+                            max="850" required>
+                        <div class="hint-text">Higher score improves approval odds</div>
+                    </div>
+                    <!-- Employment Years -->
+                    <div class="input-field">
+                        <label>💼 Employment (years)</label>
+                        <input type="number" id="employment_years" name="Employment_Years" value="2" step="0.5" min="0"
+                            max="50" required>
+                        <div class="hint-text">Full-time work experience</div>
+                    </div>
+                    <!-- Education Level -->
+                    <div class="input-field">
+                        <label>🎓 Education Level</label>
+                        <select id="education_level" name="Education_Level">
+                            <option value="High School">High School</option>
+                            <option value="Bachelors" selected>Bachelor's Degree</option>
+                            <option value="Masters">Master's Degree</option>
+                            <option value="PhD">PhD / Doctorate</option>
+                            <option value="Associate">Associate Degree</option>
+                        </select>
+                    </div>
+                    <!-- Housing Status -->
+                    <div class="input-field full-width">
+                        <label>🏠 Housing Status</label>
+                        <select id="housing_status" name="Housing_Status">
+                            <option value="Own" selected>Own</option>
+                            <option value="Rent">Rent</option>
+                            <option value="Mortgage">Mortgage</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" id="predictBtn" class="btn-predict">
+                        🔮 Predict Loan Decision
+                    </button>
+                    <button type="button" id="resetBtn" class="btn-reset">
+                        ⟳ Reset Fields
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Result panel dynamic -->
+        <div id="resultArea" class="result-card" style="display: none;">
+            <!-- content will be injected -->
+        </div>
+        <footer>
+            ⚡ ML endpoint: http://127.0.0.1:5000/predict | Ensure backend service is running
+        </footer>
+    </div>
+
+    <script>
+        // Grab DOM elements
+        const predictBtn = document.getElementById('predictBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultArea = document.getElementById('resultArea');
+
+        // Input fields mapping to match exact backend payload keys (case-sensitive)
+        const ageInput = document.getElementById('age');
+        const incomeInput = document.getElementById('income');
+        const loanAmountInput = document.getElementById('loan_amount');
+        const creditScoreInput = document.getElementById('credit_score');
+        const employmentYearsInput = document.getElementById('employment_years');
+        const educationSelect = document.getElementById('education_level');
+        const housingSelect = document.getElementById('housing_status');
+
+        // Helper: build JSON payload exactly as required:
+        // {
+        //   Age: number,
+        //   Income: number,
+        //   Loan_Amount: number,
+        //   Credit_Score: number,
+        //   Employment_Years: number,
+        //   Education_Level: string,
+        //   Housing_Status: string
+        // }
+        function buildPayload() {
+            // parse numeric values with fallback
+            let age = parseInt(ageInput.value, 10);
+            let income = parseFloat(incomeInput.value);
+            let loanAmount = parseFloat(loanAmountInput.value);
+            let creditScore = parseInt(creditScoreInput.value, 10);
+            let employmentYears = parseFloat(employmentYearsInput.value);
+
+            // Basic validation (soft but we also show error)
+            if (isNaN(age)) age = 30;
+            if (isNaN(income)) income = 0;
+            if (isNaN(loanAmount)) loanAmount = 0;
+            if (isNaN(creditScore)) creditScore = 600;
+            if (isNaN(employmentYears)) employmentYears = 0;
+
+            // clamping ranges for consistency
+            age = Math.min(100, Math.max(18, age));
+            income = Math.max(0, income);
+            loanAmount = Math.max(500, loanAmount);
+            creditScore = Math.min(850, Math.max(300, creditScore));
+            employmentYears = Math.min(50, Math.max(0, employmentYears));
+
+            const education = educationSelect.value;
+            const housing = housingSelect.value;
+
+            return {
+                Age: age,
+                Income: income,
+                Loan_Amount: loanAmount,
+                Credit_Score: creditScore,
+                Employment_Years: employmentYears,
+                Education_Level: education,
+                Housing_Status: housing
+            };
+        }
+
+        // display loading state & result rendering
+        async function callPredictionAPI() {
+            // gather and build data
+            const requestData = buildPayload();
+
+            // optional: sync back clamped values to inputs (better UX)
+            ageInput.value = requestData.Age;
+            incomeInput.value = requestData.Income;
+            loanAmountInput.value = requestData.Loan_Amount;
+            creditScoreInput.value = requestData.Credit_Score;
+            employmentYearsInput.value = requestData.Employment_Years;
+
+            // Show loading placeholder in result area
+            resultArea.style.display = "block";
+            resultArea.innerHTML = `
+            <div class="result-header">
+                <span class="prediction-badge">⏳</span>
+                <span>Analyzing loan profile...</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="loader"></div>
+                <span>Connecting to risk engine & computing decision</span>
+            </div>
+            <div class="confidence-info">Please wait, backend at 127.0.0.1:5000/predict</div>
+        `;
+
+            try {
+                // fetch configuration
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
+
+                const response = await fetch("http://127.0.0.1:5000/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestData),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    let errorText = `HTTP error ${response.status}`;
+                    try {
+                        const errJson = await response.json();
+                        errorText = errJson.message || errJson.error || errorText;
+                    } catch (e) {
+                        errorText = `Server responded with ${response.status}: ${response.statusText}`;
+                    }
+                    throw new Error(errorText);
+                }
+
+                const result = await response.json();
+                // Expecting result.prediction (string or number) e.g. "Approved" / "Rejected" or maybe 0/1
+                // We'll handle both typical patterns: classification label or binary
+                let predictionRaw = result.prediction;
+                let verdict = null;
+                let isApproved = false;
+
+                if (predictionRaw !== undefined && predictionRaw !== null) {
+                    // if it's a string: "Approved" / "Rejected", "approve" / "reject" case-insensitive
+                    if (typeof predictionRaw === 'string') {
+                        const lowerPred = predictionRaw.toLowerCase();
+                        if (lowerPred.includes('approve') || lowerPred === 'approved' || lowerPred === '1') {
+                            isApproved = true;
+                            verdict = "APPROVED";
+                        } else if (lowerPred.includes('reject') || lowerPred === 'rejected' || lowerPred === '0') {
+                            isApproved = false;
+                            verdict = "REJECTED";
+                        } else {
+                            // fallback: if unknown string but maybe something else, treat based on numeric conversion?
+                            const num = Number(predictionRaw);
+                            if (!isNaN(num)) {
+                                isApproved = num === 1;
+                                verdict = isApproved ? "APPROVED" : "REJECTED";
+                            } else {
+                                verdict = predictionRaw.toUpperCase();
+                                isApproved = verdict === "APPROVED";
+                            }
+                        }
+                    } else if (typeof predictionRaw === 'number') {
+                        isApproved = predictionRaw === 1;
+                        verdict = isApproved ? "APPROVED" : "REJECTED";
+                    } else if (typeof predictionRaw === 'boolean') {
+                        isApproved = predictionRaw;
+                        verdict = isApproved ? "APPROVED" : "REJECTED";
+                    } else {
+                        verdict = "UNCLEAR";
+                        isApproved = false;
+                    }
+                } else {
+                    // try fallback if result includes something like 'decision' or 'status'
+                    if (result.decision) {
+                        verdict = String(result.decision).toUpperCase();
+                        isApproved = verdict === "APPROVED" || verdict === "APPROVE";
+                    } else if (result.status) {
+                        verdict = String(result.status).toUpperCase();
+                        isApproved = verdict === "APPROVED";
+                    } else {
+                        throw new Error("Prediction field missing from API response");
+                    }
+                }
+
+                // confidence or extra message if present
+                const confidenceMsg = result.confidence ? `Confidence: ${result.confidence}` : (result.probability ? `Probability: ${result.probability}` : null);
+                const additionalInfo = result.message ? result.message : "";
+
+                // render final result
+                renderVerdict(verdict, isApproved, requestData, confidenceMsg, additionalInfo);
+
+            } catch (error) {
+                console.error("Prediction error:", error);
+                let errorDisplayMessage = error.message;
+                if (error.name === 'AbortError') {
+                    errorDisplayMessage = "Request timeout — backend server not responding. Please check if Flask server is running on http://127.0.0.1:5000";
+                } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    errorDisplayMessage = "Cannot connect to backend. Make sure Flask server is active at http://127.0.0.1:5000 and CORS is enabled.";
+                }
+                resultArea.innerHTML = `
+                <div class="result-header">
+                    <span class="prediction-badge">⚠️</span>
+                    <span>Prediction Error</span>
+                </div>
+                <div class="error-msg">${escapeHtml(errorDisplayMessage)}</div>
+                <div class="confidence-info">💡 Tip: verify that your ML server is running and accepts POST /predict with JSON payload.</div>
+            `;
+            }
+        }
+
+        // Render the final approval/rejection UI
+        function renderVerdict(verdict, isApproved, requestData, confidenceMsg, extraMsg) {
+            const badgeIcon = isApproved ? "✅" : "❌";
+            const verdictClass = isApproved ? "verdict-approved" : "verdict-rejected";
+            const verdictText = isApproved ? "LOAN APPROVED" : "LOAN REJECTED";
+            const recommendationMsg = isApproved
+                ? "Based on your financial profile, the model predicts high repayment capacity."
+                : "The model indicates elevated risk factors. Consider improving credit score or debt-to-income ratio.";
+
+            // show summary of input for context
+            const summaryHtml = `
+            <div style="margin-top: 12px; background: white; border-radius: 24px; padding: 12px; font-size: 0.8rem; border: 1px solid #e9edf2;">
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between;">
+                    <span><strong>🧑 Age:</strong> ${requestData.Age}</span>
+                    <span><strong>💰 Income:</strong> $${requestData.Income.toLocaleString()}</span>
+                    <span><strong>🏦 Loan:</strong> $${requestData.Loan_Amount.toLocaleString()}</span>
+                    <span><strong>⭐ Credit:</strong> ${requestData.Credit_Score}</span>
+                    <span><strong>💼 Experience:</strong> ${requestData.Employment_Years} yrs</span>
+                    <span><strong>🎓 Education:</strong> ${requestData.Education_Level}</span>
+                    <span><strong>🏠 Housing:</strong> ${requestData.Housing_Status}</span>
+                </div>
+            </div>
+        `;
+
+            const confidenceHtml = confidenceMsg ? `<div class="confidence-info">📊 ${escapeHtml(confidenceMsg)}</div>` : '';
+            const extraHtml = extraMsg ? `<div class="confidence-info">📌 ${escapeHtml(extraMsg)}</div>` : '';
+
+            resultArea.innerHTML = `
+            <div class="result-header">
+                <span class="prediction-badge">${badgeIcon}</span>
+                <span>Loan Decision Outcome</span>
+            </div>
+            <div>
+                <span class="${verdictClass} verdict-text">${verdictText}</span>
+            </div>
+            <div class="confidence-info" style="margin-top: 10px;">${recommendationMsg}</div>
+            ${summaryHtml}
+            ${confidenceHtml}
+            ${extraHtml}
+            <div class="confidence-info" style="margin-top: 12px;">
+                🔄 Prediction based on ML model | API response: ${escapeHtml(verdict)}
+            </div>
+        `;
+        }
+
+        // simple XSS protection
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function (m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function (c) {
+                return c;
+            });
+        }
+
+        // Reset all fields to initial meaningful default values (based on the original sample data)
+        function resetFormFields() {
+            ageInput.value = 30;
+            incomeInput.value = 60000;
+            loanAmountInput.value = 20000;
+            creditScoreInput.value = 680;   // changed from 00 to a realistic default for demo
+            employmentYearsInput.value = 2;
+            educationSelect.value = "Bachelors";
+            housingSelect.value = "Own";
+            // Optionally hide result or reset to neutral placeholder
+            resultArea.style.display = "none";
+        }
+
+        // manual trigger with loading
+        async function handlePredict() {
+            // show result block before loading
+            await callPredictionAPI();
+        }
+
+        // attach event listeners
+        predictBtn.addEventListener('click', handlePredict);
+        resetBtn.addEventListener('click', () => {
+            resetFormFields();
+            // optional small animation
+            resultArea.style.display = "none";
+        });
+
+        // initial reset to match default data and also set hidden result initially
+        resetFormFields();
+        // small initial message: we can show a welcome note (optional)
+        resultArea.style.display = "none";
+
+        // Optional: press Enter on any field triggers predict (nice UX)
+        const formInputs = ['age', 'income', 'loan_amount', 'credit_score', 'employment_years', 'education_level', 'housing_status'];
+        formInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('keypress', function (event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        handlePredict();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
